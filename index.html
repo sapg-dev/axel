@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey Axel</title>
+    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.1/js/anychart-stock.min.js"></script>
+    <link href="https://cdn.anychart.com/releases/8.11.1/css/anychart-ui.min.css" type="text/css" rel="stylesheet">
+    <style>
+        body {
+            background-color: black;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-top: 2vh;
+            font-size: 3em;
+            text-shadow: 0 0 10px #00f, 0 0 20px #00f, 0 0 30px #00f;
+        }
+
+        img {
+            display: block;
+            margin: 2vh auto;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f, 0 0 20px #00f, 0 0 30px #00f;
+        }
+
+        #container {
+            width: 80%;
+            height: 40vh;
+            margin: 2vh auto;
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hey Axel</h1>
+    <img src="pac.png" alt="A futuristic placeholder image">
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        async function fetchAndRenderChart() {
+            // Fetch data from Alpha Vantage
+            const response = await fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=TSLA&interval=1min&apikey=1UPFIRLZFSKQLQUP');
+            const data = await response.json();
+
+            // Convert data to a format compatible with anychart
+            const timeSeries = data['Time Series (1min)'];
+            const chartData = [];
+            for (const time in timeSeries) {
+                chartData.push([
+                    new Date(time),
+                    parseFloat(timeSeries[time]['1. open']),
+                    parseFloat(timeSeries[time]['2. high']),
+                    parseFloat(timeSeries[time]['3. low']),
+                    parseFloat(timeSeries[time]['4. close'])
+                ]);
+            }
+
+            // Render the chart using anychart
+            const dataTable = anychart.data.table();
+            dataTable.addData(chartData);
+
+            const chart = anychart.stock();
+            const plot = chart.plot(0);
+            
+            // Set theme colors for visibility against a black background
+            plot.ohlc(dataTable).name('TSLA').fallingFill('#FF5733').risingFill('#57FF33').fallingStroke('#FF5733').risingStroke('#57FF33');
+            chart.background().fill('black');
+            chart.plot(0).yAxis().labels().fontColor('white');
+            chart.plot(0).xAxis().labels().fontColor('white');
+            
+            chart.container("container");
+            chart.draw();
+        }
+
+        fetchAndRenderChart();
+    </script>
+</body>
+</html>
